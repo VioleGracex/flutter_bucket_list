@@ -119,7 +119,7 @@ class _MainPageState extends State<MainPage> {
                           margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                           child: ListTile(
                             title: Text(roadmaps[selectedDay]![index].title),
-                            subtitle: Text('${roadmaps[selectedDay]![index].tasks.length} задачи, приоритет: ${roadmaps[selectedDay]![index].priority}'),
+                            subtitle: Text('${roadmaps[selectedDay]![index].tasks.length} задачи, приоритет: ${roadmaps[selectedDay]![index].priority.toRussianString()}'),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -195,7 +195,6 @@ class _MainPageState extends State<MainPage> {
               setState(() {
                 selectedDate = DateTime.now();
               });
-             
             },
             child: Text('Сегодня', style: TextStyle(fontSize: 10)),
             backgroundColor: Colors.blueAccent,
@@ -233,5 +232,20 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
     );
+  }
+}
+
+extension RoadmapPriorityExtension on RoadmapPriority {
+  String toRussianString() {
+    switch (this) {
+      case RoadmapPriority.low:
+        return 'Низкий';
+      case RoadmapPriority.medium:
+        return 'Средний';
+      case RoadmapPriority.high:
+        return 'Высокий';
+      default:
+        return '';
+    }
   }
 }
