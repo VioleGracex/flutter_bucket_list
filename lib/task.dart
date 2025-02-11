@@ -7,14 +7,21 @@ class Task {
   String description;
   TaskStatus status;
 
-  Task({required this.title, required this.description, required this.status});
+  Task({required this.title, this.description = '', required this.status});
 }
 
 class TaskWidget extends StatelessWidget {
   final Task task;
   final ValueChanged<TaskStatus> onStatusChanged;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
-  TaskWidget({required this.task, required this.onStatusChanged});
+  TaskWidget({
+    required this.task,
+    required this.onStatusChanged,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,56 +38,74 @@ class TaskWidget extends StatelessWidget {
           ),
         ),
         subtitle: Text(task.description),
-        trailing: DropdownButton<TaskStatus>(
-          value: task.status,
-          items: [
-            DropdownMenuItem(
-              child: Text('Pending'),
-              value: TaskStatus.pending,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButton<TaskStatus>(
+              value: task.status,
+              items: [
+                DropdownMenuItem(
+                  child: Text('Pending'),
+                  value: TaskStatus.pending,
+                ),
+                DropdownMenuItem(
+                  child: Text('In Progress'),
+                  value: TaskStatus.inProgress,
+                ),
+                DropdownMenuItem(
+                  child: Text('Finished'),
+                  value: TaskStatus.finished,
+                ),
+              ],
+              onChanged: (TaskStatus? status) {
+                if (status != null) {
+                  onStatusChanged(status);
+                }
+              },
             ),
-            DropdownMenuItem(
-              child: Text('In Progress'),
-              value: TaskStatus.inProgress,
-            ),
-            DropdownMenuItem(
-              child: Text('Finished'),
-              value: TaskStatus.finished,
+            PopupMenuButton<String>(
+              onSelected: (String result) {
+                if (result == 'edit') {
+                  onEdit();
+                } else if (result == 'delete') {
+                  onDelete();
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete),
+                      SizedBox(width: 8),
+                      Text('Delete'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
-          onChanged: (TaskStatus? status) {
-            if (status != null) {
-              onStatusChanged(status);
-            }
-          },
         ),
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                title: Text(task.title),
-                content: Text(task.description),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Close'),
-                  ),
-                ],
-              );
-            },
-          );
-        },
       ),
     );
   }
 }
 
 class TaskDialog extends StatefulWidget {
+  final Task? task;
+
+  TaskDialog({this.task});
+
   @override
   _TaskDialogState createState() => _TaskDialogState();
 }
@@ -90,22 +115,37 @@ class _TaskDialogState extends State<TaskDialog> {
   final _descriptionController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title;
+      _descriptionController.text = widget.task!.description;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      title: Text('New Task'),
+      title: Text(widget.task == null ? 'New Task' : 'Edit Task'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _titleController,
-            decoration: InputDecoration(labelText: 'Title'),
+            decoration: InputDecoration(
+              icon: Icon(Icons.title),
+              labelText: 'Title',
+            ),
           ),
           TextField(
             controller: _descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
+            decoration: InputDecoration(
+              icon: Icon(Icons.description),
+              labelText: 'Description',
+            ),
           ),
         ],
       ),
@@ -121,15 +161,15 @@ class _TaskDialogState extends State<TaskDialog> {
             final title = _titleController.text;
             final description = _descriptionController.text;
             if (title.isNotEmpty) {
-              final newTask = Task(
+              final task = Task(
                 title: title,
                 description: description,
-                status: TaskStatus.pending,
+                status: widget.task?.status ?? TaskStatus.pending,
               );
-              Navigator.of(context).pop(newTask);
+              Navigator.of(context).pop(task);
             }
           },
-          child: Text('Create'),
+          child: Text('Save'),
         ),
       ],
     );

@@ -37,6 +37,18 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  void _deleteRoadmap(int index) {
+    setState(() {
+      roadmaps.removeAt(index);
+    });
+  }
+
+  void _editRoadmap(int index, Roadmap roadmap) {
+    setState(() {
+      roadmaps[index] = roadmap;
+    });
+  }
+
   void _updateRoadmaps() {
     setState(() {});
   }
@@ -72,18 +84,54 @@ class _MainPageState extends State<MainPage> {
                     child: ListTile(
                       title: Text(roadmaps[index].title),
                       subtitle: Text('${roadmaps[index].tasks.length} tasks'),
-                      trailing: CustomPaint(
-                        foregroundPainter: CircleProgressPainter(roadmaps[index].progress),
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Center(
-                            child: Text(
-                              '${(roadmaps[index].progress * 100).round()}%',
-                              style: TextStyle(fontSize: 12),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CustomPaint(
+                            foregroundPainter: CircleProgressPainter(roadmaps[index].progress),
+                            child: SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: Center(
+                                child: Text(
+                                  '${(roadmaps[index].progress * 100).round()}%',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          PopupMenuButton<String>(
+                            onSelected: (String result) {
+                              if (result == 'edit') {
+                                _editRoadmap(index, roadmaps[index]);
+                              } else if (result == 'delete') {
+                                _deleteRoadmap(index);
+                              }
+                            },
+                            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                              PopupMenuItem<String>(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit),
+                                    SizedBox(width: 8),
+                                    Text('Edit'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete),
+                                    SizedBox(width: 8),
+                                    Text('Delete'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       onTap: () async {
                         await Navigator.push(
@@ -119,6 +167,10 @@ class _MainPageState extends State<MainPage> {
 }
 
 class RoadmapDialog extends StatefulWidget {
+  final Roadmap? roadmap;
+
+  RoadmapDialog({this.roadmap});
+
   @override
   _RoadmapDialogState createState() => _RoadmapDialogState();
 }
@@ -128,22 +180,37 @@ class _RoadmapDialogState extends State<RoadmapDialog> {
   final _descriptionController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.roadmap != null) {
+      _titleController.text = widget.roadmap!.title;
+      _descriptionController.text = widget.roadmap!.description;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      title: Text('New Roadmap'),
+      title: Text(widget.roadmap == null ? 'New Roadmap' : 'Edit Roadmap'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _titleController,
-            decoration: InputDecoration(labelText: 'Title'),
+            decoration: InputDecoration(
+              icon: Icon(Icons.title),
+              labelText: 'Title',
+            ),
           ),
           TextField(
             controller: _descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
+            decoration: InputDecoration(
+              icon: Icon(Icons.description),
+              labelText: 'Description',
+            ),
           ),
         ],
       ),
@@ -159,11 +226,11 @@ class _RoadmapDialogState extends State<RoadmapDialog> {
             final title = _titleController.text;
             final description = _descriptionController.text;
             if (title.isNotEmpty) {
-              final newRoadmap = Roadmap(title: title, description: description);
-              Navigator.of(context).pop(newRoadmap);
+              final roadmap = Roadmap(title: title, description: description);
+              Navigator.of(context).pop(roadmap);
             }
           },
-          child: Text('Create'),
+          child: Text('Save'),
         ),
       ],
     );

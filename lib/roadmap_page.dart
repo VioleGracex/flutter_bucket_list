@@ -19,6 +19,20 @@ class _RoadmapPageState extends State<RoadmapPage> {
     });
   }
 
+  void _deleteTask(int index) {
+    setState(() {
+      widget.roadmap.tasks.removeAt(index);
+      widget.roadmap.calculateProgress();
+    });
+  }
+
+  void _editTask(int index, Task task) {
+    setState(() {
+      widget.roadmap.tasks[index] = task;
+      widget.roadmap.calculateProgress();
+    });
+  }
+
   void _updateTask(Task task, TaskStatus status) {
     setState(() {
       task.status = status;
@@ -60,12 +74,26 @@ class _RoadmapPageState extends State<RoadmapPage> {
                       onStatusChanged: (status) {
                         _updateTask(widget.roadmap.tasks[index], status);
                       },
+                      onEdit: () async {
+                        final editedTask = await showDialog<Task>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return TaskDialog(task: widget.roadmap.tasks[index]);
+                          },
+                        );
+                        if (editedTask != null) {
+                          _editTask(index, editedTask);
+                        }
+                      },
+                      onDelete: () {
+                        _deleteTask(index);
+                      },
                     );
                   },
                 ),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () async {
                   final newTask = await showDialog<Task>(
                     context: context,
@@ -77,9 +105,15 @@ class _RoadmapPageState extends State<RoadmapPage> {
                     _addTask(newTask);
                   }
                 },
-                child: Text('Add Task'),
+                icon: Icon(Icons.add),
+                label: Text('Add Task'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ],
