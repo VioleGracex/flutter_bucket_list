@@ -6,7 +6,6 @@ import 'circle_progress_painter.dart';
 import 'roadmap_page.dart';
 import 'date_carousel.dart';
 
-
 class MainPage extends StatefulWidget {
   @override
   _MainPageState createState() => _MainPageState();
@@ -66,11 +65,11 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final selectedDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-    String selectedDateString = DateFormat('EEEE, MMM dd').format(selectedDate);
+    String selectedDateString = DateFormat('EEEE, MMM dd', 'ru').format(selectedDate);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bucket List'),
+        title: Text('Список Дел'),
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
@@ -108,7 +107,7 @@ class _MainPageState extends State<MainPage> {
               child: roadmaps[selectedDay] == null || roadmaps[selectedDay]!.isEmpty
                   ? Center(
                       child: Text(
-                        'No Roadmaps yet! Start by adding a new roadmap.',
+                        'Пока нет планов! Начните с добавления нового плана.',
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     )
@@ -120,7 +119,7 @@ class _MainPageState extends State<MainPage> {
                           margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                           child: ListTile(
                             title: Text(roadmaps[selectedDay]![index].title),
-                            subtitle: Text('${roadmaps[selectedDay]![index].tasks.length} tasks'),
+                            subtitle: Text('${roadmaps[selectedDay]![index].tasks.length} задачи, приоритет: ${roadmaps[selectedDay]![index].priority}'),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -152,7 +151,7 @@ class _MainPageState extends State<MainPage> {
                                         children: [
                                           Icon(Icons.edit),
                                           SizedBox(width: 8),
-                                          Text('Edit'),
+                                          Text('Редактировать'),
                                         ],
                                       ),
                                     ),
@@ -162,7 +161,7 @@ class _MainPageState extends State<MainPage> {
                                         children: [
                                           Icon(Icons.delete),
                                           SizedBox(width: 8),
-                                          Text('Delete'),
+                                          Text('Удалить'),
                                         ],
                                       ),
                                     ),
@@ -191,17 +190,19 @@ class _MainPageState extends State<MainPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
+            heroTag: 'today_button',
             onPressed: () {
               setState(() {
                 selectedDate = DateTime.now();
               });
              
             },
-            child: Text('Today', style: TextStyle(fontSize: 10)),
+            child: Text('Сегодня', style: TextStyle(fontSize: 10)),
             backgroundColor: Colors.blueAccent,
           ),
           SizedBox(height: 10),
           FloatingActionButton(
+            heroTag: 'add_button',
             onPressed: () async {
               final roadmap = await showModalBottomSheet<Roadmap>(
                 context: context,

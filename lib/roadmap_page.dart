@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'roadmap.dart';
 import 'task.dart'; // Ensure Task class is imported
 import 'task_widget.dart'; // Ensure TaskWidget class is imported
+import 'task_dialog.dart'; // Ensure TaskDialog class is imported
 
 class RoadmapPage extends StatefulWidget {
   final Roadmap roadmap;
@@ -13,6 +14,27 @@ class RoadmapPage extends StatefulWidget {
 }
 
 class _RoadmapPageState extends State<RoadmapPage> {
+  void _addTask(Task task) {
+    setState(() {
+      widget.roadmap.tasks.add(task);
+      widget.roadmap.calculateProgress();
+    });
+  }
+
+  void _deleteTask(int index) {
+    setState(() {
+      widget.roadmap.tasks.removeAt(index);
+      widget.roadmap.calculateProgress();
+    });
+  }
+
+  void _editTask(int index, Task task) {
+    setState(() {
+      widget.roadmap.tasks[index] = task;
+      widget.roadmap.calculateProgress();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,17 +80,11 @@ class _RoadmapPageState extends State<RoadmapPage> {
                           },
                         );
                         if (editedTask != null) {
-                          setState(() {
-                            widget.roadmap.tasks[index] = editedTask;
-                            widget.roadmap.calculateProgress();
-                          });
+                          _editTask(index, editedTask);
                         }
                       },
                       onDelete: () {
-                        setState(() {
-                          widget.roadmap.tasks.removeAt(index);
-                          widget.roadmap.calculateProgress();
-                        });
+                        _deleteTask(index);
                       },
                     );
                   },
@@ -84,14 +100,11 @@ class _RoadmapPageState extends State<RoadmapPage> {
                     },
                   );
                   if (newTask != null) {
-                    setState(() {
-                      widget.roadmap.tasks.add(newTask);
-                      widget.roadmap.calculateProgress();
-                    });
+                    _addTask(newTask);
                   }
                 },
                 icon: Icon(Icons.add),
-                label: Text('Add Task'),
+                label: Text('Добавить Задачу'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   foregroundColor: Colors.white,

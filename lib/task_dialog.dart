@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
-import 'roadmap.dart';
+import 'task.dart';
 
-class RoadmapDialog extends StatefulWidget {
-  final Roadmap? roadmap;
+class TaskDialog extends StatefulWidget {
+  final Task? task;
 
-  RoadmapDialog({this.roadmap});
+  TaskDialog({this.task});
 
   @override
-  _RoadmapDialogState createState() => _RoadmapDialogState();
+  _TaskDialogState createState() => _TaskDialogState();
 }
 
-class _RoadmapDialogState extends State<RoadmapDialog> {
+class _TaskDialogState extends State<TaskDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  RoadmapPriority _priority = RoadmapPriority.medium;
+  TaskPriority _priority = TaskPriority.medium;
 
   @override
   void initState() {
     super.initState();
-    if (widget.roadmap != null) {
-      _titleController.text = widget.roadmap!.title;
-      _descriptionController.text = widget.roadmap!.description;
-      _priority = widget.roadmap!.priority;
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title;
+      _descriptionController.text = widget.task!.description;
+      _priority = widget.task!.priority;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.roadmap == null ? 'Добавить План' : 'Редактировать План'),
+      title: Text(widget.task == null ? 'Добавить Задачу' : 'Редактировать Задачу'),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,23 +52,23 @@ class _RoadmapDialogState extends State<RoadmapDialog> {
               children: [
                 Text('Приоритет:', style: TextStyle(fontSize: 16)),
                 SizedBox(width: 10),
-                DropdownButton<RoadmapPriority>(
+                DropdownButton<TaskPriority>(
                   value: _priority,
                   items: [
                     DropdownMenuItem(
                       child: Text('Низкий'),
-                      value: RoadmapPriority.low,
+                      value: TaskPriority.low,
                     ),
                     DropdownMenuItem(
                       child: Text('Средний'),
-                      value: RoadmapPriority.medium,
+                      value: TaskPriority.medium,
                     ),
                     DropdownMenuItem(
                       child: Text('Высокий'),
-                      value: RoadmapPriority.high,
+                      value: TaskPriority.high,
                     ),
                   ],
-                  onChanged: (RoadmapPriority? priority) {
+                  onChanged: (TaskPriority? priority) {
                     setState(() {
                       _priority = priority!;
                     });
@@ -91,12 +91,12 @@ class _RoadmapDialogState extends State<RoadmapDialog> {
             final title = _titleController.text;
             final description = _descriptionController.text;
             if (title.isNotEmpty) {
-              final roadmap = Roadmap(
+              final task = Task(
                 title: title,
                 description: description,
                 priority: _priority,
               );
-              Navigator.of(context).pop(roadmap);
+              Navigator.of(context).pop(task);
             }
           },
           child: Text('Сохранить'),

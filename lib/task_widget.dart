@@ -28,7 +28,7 @@ class TaskWidget extends StatelessWidget {
                 : TextDecoration.none,
           ),
         ),
-        subtitle: Text(task.description),
+        subtitle: Text('${task.description}, Приоритет: ${_priorityText(task.priority)}'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -36,15 +36,15 @@ class TaskWidget extends StatelessWidget {
               value: task.status,
               items: [
                 DropdownMenuItem(
-                  child: Text('Pending'),
+                  child: Text('В ожидании'),
                   value: TaskStatus.pending,
                 ),
                 DropdownMenuItem(
-                  child: Text('In Progress'),
+                  child: Text('В процессе'),
                   value: TaskStatus.inProgress,
                 ),
                 DropdownMenuItem(
-                  child: Text('Completed'),
+                  child: Text('Завершено'),
                   value: TaskStatus.completed,
                 ),
               ],
@@ -69,7 +69,7 @@ class TaskWidget extends StatelessWidget {
                     children: [
                       Icon(Icons.edit),
                       SizedBox(width: 8),
-                      Text('Edit'),
+                      Text('Редактировать'),
                     ],
                   ),
                 ),
@@ -79,7 +79,7 @@ class TaskWidget extends StatelessWidget {
                     children: [
                       Icon(Icons.delete),
                       SizedBox(width: 8),
-                      Text('Delete'),
+                      Text('Удалить'),
                     ],
                   ),
                 ),
@@ -90,79 +90,17 @@ class TaskWidget extends StatelessWidget {
       ),
     );
   }
-}
 
-class TaskDialog extends StatefulWidget {
-  final Task? task;
-
-  TaskDialog({this.task});
-
-  @override
-  _TaskDialogState createState() => _TaskDialogState();
-}
-
-class _TaskDialogState extends State<TaskDialog> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.task != null) {
-      _titleController.text = widget.task!.title;
-      _descriptionController.text = widget.task!.description;
+  String _priorityText(TaskPriority priority) {
+    switch (priority) {
+      case TaskPriority.low:
+        return 'Низкий';
+      case TaskPriority.medium:
+        return 'Средний';
+      case TaskPriority.high:
+        return 'Высокий';
+      default:
+        return 'Средний';
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      title: Text(widget.task == null ? 'New Task' : 'Edit Task'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(
-              icon: Icon(Icons.title),
-              labelText: 'Title',
-            ),
-          ),
-          TextField(
-            controller: _descriptionController,
-            decoration: InputDecoration(
-              icon: Icon(Icons.description),
-              labelText: 'Description',
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            final title = _titleController.text;
-            final description = _descriptionController.text;
-            if (title.isNotEmpty) {
-              final task = Task(
-                title: title,
-                description: description,
-                status: widget.task?.status ?? TaskStatus.pending,
-              );
-              Navigator.of(context).pop(task);
-            }
-          },
-          child: Text('Save'),
-        ),
-      ],
-    );
   }
 }
