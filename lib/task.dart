@@ -5,13 +5,9 @@ class Task {
 
   Task({
     required this.title,
-    this.description = '',
+    required this.description,
     this.status = TaskStatus.pending,
   });
 }
 
-enum TaskStatus {
-  pending,
-  inProgress,
-  finished,
-}
+enum TaskStatus { pending, inProgress, completed }

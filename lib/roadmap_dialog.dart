@@ -28,6 +28,7 @@ class _RoadmapDialogState extends State<RoadmapDialog> {
     return Container(
       padding: EdgeInsets.all(16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _titleController,
@@ -44,22 +45,24 @@ class _RoadmapDialogState extends State<RoadmapDialog> {
             ),
           ),
           SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              final title = _titleController.text;
-              final description = _descriptionController.text;
-              if (title.isNotEmpty) {
-                final roadmap = Roadmap(title: title, description: description);
-                Navigator.of(context).pop(roadmap);
-              }
-            },
-            child: Text('Save'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              foregroundColor: Colors.white,
-              textStyle: TextStyle(fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                final title = _titleController.text;
+                final description = _descriptionController.text;
+                if (title.isNotEmpty) {
+                  final roadmap = Roadmap(title: title, description: description);
+                  Navigator.of(context).pop(roadmap);
+                }
+              },
+              child: Text('Save'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),

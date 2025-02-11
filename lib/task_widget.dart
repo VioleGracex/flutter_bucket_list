@@ -23,7 +23,7 @@ class TaskWidget extends StatelessWidget {
         title: Text(
           task.title,
           style: TextStyle(
-            decoration: task.status == TaskStatus.finished
+            decoration: task.status == TaskStatus.completed
                 ? TextDecoration.lineThrough
                 : TextDecoration.none,
           ),
@@ -44,8 +44,8 @@ class TaskWidget extends StatelessWidget {
                   value: TaskStatus.inProgress,
                 ),
                 DropdownMenuItem(
-                  child: Text('Finished'),
-                  value: TaskStatus.finished,
+                  child: Text('Completed'),
+                  value: TaskStatus.completed,
                 ),
               ],
               onChanged: (TaskStatus? status) {
