@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'roadmap.dart';
+import 'roadmap_dialog.dart';
+import 'task_widget.dart';
+import 'circle_progress_painter.dart';
+import 'roadmap_page.dart';
+import 'date_carousel.dart';
+
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  Map<DateTime, List<Roadmap>> roadmaps = {};
+  DateTime selectedDate = DateTime.now();
+
+  void _addRoadmap(Roadmap roadmap) {
+    setState(() {
+      if (!roadmaps.containsKey(selectedDate)) {
+        roadmaps[selectedDate] = [];
+      }
+      roadmaps[selectedDate]!.add(roadmap);
+    });
+  }
+
+  void _deleteRoadmap(int index) {
+    setState(() {
+      roadmaps[selectedDate]?.removeAt(index);
+    });
+  }
+
+  void _editRoadmap(int index, Roadmap roadmap) {
+    setState(() {
+      roadmaps[selectedDate]![index] = roadmap;
+    });
+  }
+
+  void _updateRoadmaps() {
+    setState(() {});
+  }
+
+  void _selectDate(DateTime date) {
+    setState(() {
+      selectedDate = date;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String selectedDateString = DateFormat('EEEE, MMM dd').format(selectedDate);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Bucket List'),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[100]!, Colors.blue[300]!],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                selectedDateString,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            DateCarousel(
+              selectedDate: selectedDate,
+              onDateSelected: _selectDate,
+            ),
+            Expanded(
+              child: roadmaps[selectedDate] == null || roadmaps[selectedDate]!.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No Roadmaps yet! Start by adding a new roadmap.',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: roadmaps[selectedDate]!.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 5,
+                          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          child: ListTile(
+                            title: Text(roadmaps[selectedDate]![index].title),
+                            subtitle: Text('${roadmaps[selectedDate]![index].tasks.length} tasks'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CustomPaint(
+                                  foregroundPainter: CircleProgressPainter(roadmaps[selectedDate]![index].progress),
+                                  child: SizedBox(
+                                    width: 40,
+                                    height: 40,
+                                    child: Center(
+                                      child: Text(
+                                        '${(roadmaps[selectedDate]![index].progress * 100).round()}%',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                PopupMenuButton<String>(
+                                  onSelected: (String result) {
+                                    if (result == 'edit') {
+                                      _editRoadmap(index, roadmaps[selectedDate]![index]);
+                                    } else if (result == 'delete') {
+                                      _deleteRoadmap(index);
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                    PopupMenuItem<String>(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit),
+                                          SizedBox(width: 8),
+                                          Text('Edit'),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuItem<String>(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete),
+                                          SizedBox(width: 8),
+                                          Text('Delete'),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RoadmapPage(roadmap: roadmaps[selectedDate]![index]),
+                                ),
+                              );
+                              _updateRoadmaps();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              _selectDate(DateTime.now());
+            },
+            child: Text('Today', style: TextStyle(fontSize: 10)),
+            backgroundColor: Colors.blueAccent,
+          ),
+          SizedBox(height: 10),
+          FloatingActionButton(
+            onPressed: () async {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.blue[100],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+                ),
+                builder: (BuildContext context) {
+                  return DraggableScrollableSheet(
+                    initialChildSize: 0.75,
+                    minChildSize: 0.5,
+                    maxChildSize: 0.9,
+                    expand: false,
+                    builder: (BuildContext context, ScrollController scrollController) {
+                      return RoadmapDialog();
+                    },
+                  );
+                },
+              );
+            },
+            child: Icon(Icons.add),
+            backgroundColor: Colors.blueAccent,
+          ),
+        ],
+      ),
+    );
+  }
+}

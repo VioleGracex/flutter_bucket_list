@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'roadmap.dart';
-import 'task.dart';
+import 'task_widget.dart';
+import 'task.dart'; // Ensure Task class is imported
 
 class RoadmapPage extends StatefulWidget {
   final Roadmap roadmap;
@@ -12,34 +13,6 @@ class RoadmapPage extends StatefulWidget {
 }
 
 class _RoadmapPageState extends State<RoadmapPage> {
-  void _addTask(Task task) {
-    setState(() {
-      widget.roadmap.tasks.add(task);
-      widget.roadmap.calculateProgress();
-    });
-  }
-
-  void _deleteTask(int index) {
-    setState(() {
-      widget.roadmap.tasks.removeAt(index);
-      widget.roadmap.calculateProgress();
-    });
-  }
-
-  void _editTask(int index, Task task) {
-    setState(() {
-      widget.roadmap.tasks[index] = task;
-      widget.roadmap.calculateProgress();
-    });
-  }
-
-  void _updateTask(Task task, TaskStatus status) {
-    setState(() {
-      task.status = status;
-      widget.roadmap.calculateProgress();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +45,10 @@ class _RoadmapPageState extends State<RoadmapPage> {
                     return TaskWidget(
                       task: widget.roadmap.tasks[index],
                       onStatusChanged: (status) {
-                        _updateTask(widget.roadmap.tasks[index], status);
+                        setState(() {
+                          widget.roadmap.tasks[index].status = status;
+                          widget.roadmap.calculateProgress();
+                        });
                       },
                       onEdit: () async {
                         final editedTask = await showDialog<Task>(
@@ -82,11 +58,17 @@ class _RoadmapPageState extends State<RoadmapPage> {
                           },
                         );
                         if (editedTask != null) {
-                          _editTask(index, editedTask);
+                          setState(() {
+                            widget.roadmap.tasks[index] = editedTask;
+                            widget.roadmap.calculateProgress();
+                          });
                         }
                       },
                       onDelete: () {
-                        _deleteTask(index);
+                        setState(() {
+                          widget.roadmap.tasks.removeAt(index);
+                          widget.roadmap.calculateProgress();
+                        });
                       },
                     );
                   },
@@ -102,7 +84,10 @@ class _RoadmapPageState extends State<RoadmapPage> {
                     },
                   );
                   if (newTask != null) {
-                    _addTask(newTask);
+                    setState(() {
+                      widget.roadmap.tasks.add(newTask);
+                      widget.roadmap.calculateProgress();
+                    });
                   }
                 },
                 icon: Icon(Icons.add),
